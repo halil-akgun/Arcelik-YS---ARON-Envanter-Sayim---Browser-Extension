@@ -1,0 +1,471 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+:root {
+  --ink: #111820;
+  --muted: #69747b;
+  --line: #dce2e3;
+  --red: #e30613;
+  --red-soft: #ffe2e3;
+  --blue: #1677d2;
+  --blue-soft: #dceeff;
+  --yellow: #ffd400;
+  --paper: #f6f7f5;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font:
+    14px Manrope,
+    sans-serif;
+}
+.workspace {
+  max-width: 1500px;
+  height: 100vh;
+  margin: auto;
+  padding: 24px 34px 40px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.topbar,
+.quick-area,
+.tabs {
+  flex-shrink: 0;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand img {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+}
+.brand strong {
+  display: block;
+  font:
+    700 25px "Barlow Condensed",
+    sans-serif;
+  letter-spacing: 1px;
+}
+.brand span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.button {
+  border: 0;
+  border-radius: 5px;
+  padding: 11px 16px;
+  font: 700 12px Manrope;
+  cursor: pointer;
+}
+.button-dark {
+  background: var(--ink);
+  color: white;
+}
+.quick-area {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(300px, 1.4fr) 190px;
+  gap: 20px;
+  align-items: stretch;
+  padding: 28px 0;
+}
+.entry-panel,
+.selected-card,
+.counter-panel {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 18px;
+}
+.entry-panel label,
+.counter-label,
+.eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.input-row {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  margin: 9px 0 7px;
+}
+.input-row input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  padding: 13px 12px;
+  outline: 0;
+  font: 600 15px Manrope;
+}
+.icon-button {
+  border: 0;
+  background: none;
+  font-size: 24px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.entry-panel small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.selected-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.selected-card.empty {
+  justify-content: center;
+}
+.selected-card strong {
+  font-size: 20px;
+}
+.selected-card > span:not(.eyebrow) {
+  color: var(--muted);
+}
+.selected-meta {
+  display: flex;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin-top: auto;
+  color: var(--ink) !important;
+  font-size: 12px;
+}
+.counter-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 14px 18px 20px;
+}
+.counter-panel output {
+  display: block;
+  font: 700 54px "Barlow Condensed";
+  line-height: 1;
+  margin-top: 8px;
+}
+.counter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.counter-actions button {
+  width: 39px;
+  height: 39px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 4px;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.counter-actions button:hover {
+  background: var(--yellow);
+}
+.tabs {
+  display: flex;
+  border-bottom: 3px solid var(--ink);
+  gap: 2px;
+}
+.tab {
+  border: 0;
+  background: transparent;
+  padding: 13px 30px;
+  font-weight: 800;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab.active {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 6px 6px 0 0;
+}
+.view-heading,
+.table-tools,
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.view-heading {
+  padding: 28px 0 18px;
+}
+.view-heading h1 {
+  font: 600 34px "Barlow Condensed";
+  margin: 3px 0;
+}
+.summary-pill {
+  background: var(--yellow);
+  padding: 7px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.count-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  gap: 12px;
+}
+.count-view {
+  min-height: 0;
+  overflow: auto;
+}
+.count-tile {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--line);
+  border-radius: 7px;
+  padding: 16px;
+  min-height: 145px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.count-tile.under {
+  background: var(--red-soft);
+  border-left-color: var(--red);
+}
+.count-tile.over {
+  background: var(--blue-soft);
+  border-left-color: var(--blue);
+}
+.tile-stock {
+  font-weight: 800;
+}
+.tile-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.tile-numbers {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+}
+.tile-numbers strong {
+  font: 700 55px "Barlow Condensed";
+  line-height: 0.8;
+}
+.tile-numbers span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.table-tools {
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 18px 0;
+}
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0 12px;
+  flex: 1;
+  min-width: 240px;
+}
+.search-wrap input {
+  border: 0;
+  outline: 0;
+  padding: 12px 0;
+  width: 100%;
+  font: 13px Manrope;
+}
+.table-tools select {
+  border: 1px solid var(--ink);
+  border-radius: 5px;
+  background: #fff;
+  padding: 11px 30px 11px 12px;
+  font: 600 12px Manrope;
+}
+.check-label {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.table-shell {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+.table-view {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 900px;
+  font-size: 12px;
+}
+th {
+  position: sticky;
+  top: 0;
+  background: #edf0ee;
+  text-align: left;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 11px 9px;
+  z-index: 1;
+}
+td {
+  padding: 9px;
+  border-bottom: 1px solid #edf0ee;
+  max-width: 290px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+tbody tr {
+  cursor: pointer;
+}
+tbody tr:hover {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+  background: #fffbe1;
+}
+tbody tr.under {
+  background: var(--red-soft);
+}
+tbody tr.over {
+  background: var(--blue-soft);
+}
+.sort-button {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+.sort-button span {
+  color: #a5abad;
+  font-size: 14px;
+}
+.sort-button.active span {
+  color: var(--ink);
+}
+.table-footer {
+  padding: 13px 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.hidden {
+  display: none !important;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 32, 0.46);
+  display: grid;
+  place-items: center;
+  z-index: 5;
+}
+.modal-card {
+  background: #fff;
+  border-radius: 10px;
+  width: min(390px, calc(100vw - 40px));
+  padding: 28px;
+  text-align: center;
+}
+.modal-icon {
+  margin: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font: bold 28px "Barlow Condensed";
+  line-height: 44px;
+}
+.modal-card h2 {
+  margin: 14px 0 6px;
+}
+.modal-card p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.modal-card button {
+  margin-top: 10px;
+  width: 100%;
+}
+@media (max-width: 800px) {
+  .workspace {
+    padding: 16px;
+  }
+  .quick-area {
+    grid-template-columns: 1fr;
+  }
+  .counter-panel {
+    min-height: 90px;
+  }
+  .table-tools {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .search-wrap {
+    width: 100%;
+  }
+  .check-label {
+    white-space: normal;
+  }
+  .toolbar > span {
+    display: none;
+  }
+}
+@media (max-height: 640px) {
+  html,
+  body {
+    min-height: 640px;
+    overflow-y: auto;
+  }
+  .workspace {
+    min-height: 640px;
+    height: 640px;
+    overflow: visible;
+  }
+}
