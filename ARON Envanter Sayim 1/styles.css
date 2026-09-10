@@ -90,7 +90,10 @@ body {
 }
 .quick-area {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(300px, 1.4fr) 190px;
+  grid-template-columns:
+    minmax(220px, 0.85fr)
+    minmax(260px, 1.15fr)
+    minmax(230px, 0.9fr);
   gap: 20px;
   align-items: stretch;
   padding: 28px 0;
@@ -164,13 +167,32 @@ body {
 }
 .counter-panel {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 18px 14px 18px 20px;
+  transition: background-color 120ms ease;
 }
-.counter-panel output {
+.counter-panel.under {
+  background: var(--red-soft);
+}
+.counter-panel.over {
+  background: var(--blue-soft);
+}
+.counter-panel.equal {
+  background: #fff;
+}
+.counter-value {
+  min-width: 0;
+  flex: 1;
+}
+.counter-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--line);
+}
+.counter-value output {
   display: block;
-  font: 700 54px "Barlow Condensed";
+  font: 700 48px "Barlow Condensed";
   line-height: 1;
   margin-top: 8px;
 }
@@ -238,6 +260,59 @@ body {
 }
 .count-view {
   min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+.main-count-panel {
+  min-height: 260px;
+  flex: 1;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 10%;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  transition: background-color 120ms ease;
+}
+.main-count-panel.under {
+  background: var(--red-soft);
+}
+.main-count-panel.over {
+  background: var(--blue-soft);
+}
+.main-count-panel.equal {
+  background: #fff;
+}
+.main-count-value {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.main-count-value span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.main-count-value strong {
+  display: block;
+  margin-top: 12px;
+  font: 700 clamp(84px, 13vw, 250px) "Barlow Condensed";
+  line-height: 0.85;
+}
+.main-count-divider {
+  width: 2px;
+  align-self: stretch;
+  background: var(--line);
+}
+.diff-view {
+  min-height: 0;
+  flex: 1;
   overflow: auto;
 }
 .count-tile {
@@ -455,6 +530,14 @@ tbody tr.over {
   }
   .toolbar > span {
     display: none;
+  }
+  .main-count-panel {
+    min-height: 220px;
+    gap: 5%;
+    padding: 20px;
+  }
+  .main-count-value strong {
+    font-size: clamp(72px, 18vw, 160px);
   }
 }
 @media (max-height: 640px) {

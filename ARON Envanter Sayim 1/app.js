@@ -72,8 +72,18 @@ function updateSelected(item, increase = false) {
   $("#selectedName").textContent = item.name;
   $("#selectedAddress").textContent = `Adres ${item.address || "-"}`;
   $("#selectedWarehouse").textContent = item.warehouse || "Depo -";
+  $("#stockCountOutput").textContent = item.stockCount;
   $("#countOutput").value = item.count;
   $("#countOutput").textContent = item.count;
+  $("#mainCountStock").textContent = item.stock;
+  $("#mainStockCount").textContent = item.stockCount;
+  $("#mainCount").textContent = item.count;
+  $("#counterPanel").classList.remove("under", "over", "equal");
+  $("#mainCountPanel").classList.remove("under", "over", "equal");
+  const statusClass =
+    item.difference < 0 ? "under" : item.difference > 0 ? "over" : "equal";
+  $("#counterPanel").classList.add(statusClass);
+  $("#mainCountPanel").classList.add(statusClass);
   render();
   saveData();
   requestAnimationFrame(() => $("#stockInput").focus());
@@ -215,6 +225,7 @@ function bindEvents() {
         .forEach((entry) => entry.classList.toggle("active", entry === tab));
       $("#countView").classList.toggle("hidden", state.view !== "count");
       $("#tableView").classList.toggle("hidden", state.view !== "table");
+      $("#diffView").classList.toggle("hidden", state.view !== "diff");
     }),
   );
   document.addEventListener("click", (event) => {

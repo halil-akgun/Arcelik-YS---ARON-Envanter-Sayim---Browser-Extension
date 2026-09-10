@@ -1,153 +1,159 @@
 <!doctype html>
 <html lang="tr">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ARON Envanter Sayim</title>
     <link rel="stylesheet" href="styles.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <main class="workspace">
-      <header class="topbar">
-        <div class="brand">
-          <img src="icon.svg" alt="ARON" />
-          <div><strong>ARON</strong><span>ENVANTER SAYIM</span></div>
-        </div>
-        <div class="toolbar">
-          <span id="dataStatus">Veri bekleniyor</span
-          ><button id="refreshButton" class="button button-dark">
-            Verileri yenile
-          </button>
-        </div>
-      </header>
-      <section class="quick-area">
-        <div class="entry-panel">
-          <label for="stockInput">Stok numarası / barkod</label>
-          <div class="input-row">
-            <input
-              id="stockInput"
-              autocomplete="off"
-              autofocus
-              placeholder="Stok no okutun veya yazın"
-            /><button
-              id="clearButton"
-              class="icon-button"
-              title="Girişi temizle"
-            >
-              ×
-            </button>
-          </div>
-          <small
-            >Okutma sonrası giriş alanı otomatik olarak yeniden seçilir.</small
-          >
-        </div>
-        <div id="selectedCard" class="selected-card empty">
-          <span class="eyebrow">SEÇİLİ ÜRÜN</span
-          ><strong id="selectedStock">Ürün seçilmedi</strong
-          ><span id="selectedName">Barkod okutarak başlayın</span>
-          <div class="selected-meta">
-            <span id="selectedAddress">Adres -</span
-            ><span id="selectedWarehouse">Depo -</span>
-          </div>
-        </div>
-        <div class="counter-panel">
-          <div>
-            <span class="counter-label">SAYIM</span
-            ><output id="countOutput">0</output>
-          </div>
-          <div class="counter-actions">
-            <button id="incrementButton" title="Sayımı artır">+</button>
-            <button id="decrementButton" title="Sayımı azalt">−</button>
-          </div>
-        </div>
-      </section>
-      <nav class="tabs">
-        <button class="tab active" data-view="count">Sayım ekranı</button
-        ><button class="tab" data-view="table">Tablo</button>
-      </nav>
-      <section id="countView" class="view count-view">
-        <div class="view-heading">
-          <div>
-            <span class="eyebrow">CANLI GÖRÜNÜM</span>
-            <h1>Sayım durumu</h1>
-          </div>
-          <span id="countSummary" class="summary-pill">0 ürün</span>
-        </div>
-        <div id="countGrid" class="count-grid"></div>
-      </section>
-      <section id="tableView" class="view table-view hidden">
-        <div class="table-tools">
-          <div class="search-wrap">
-            <span>⌕</span
-            ><input
-              id="searchInput"
-              placeholder="Stok no, malzeme adı veya adres ara"
-            />
-          </div>
-          <select id="filterSelect">
-            <option value="over">Depo adedi sayımdan fazla</option>
-            <option value="under">Depo adedi sayımdan az</option>
-            <option value="all">Tümü</option></select
-          ><label class="check-label"
-            ><input id="hideZero" type="checkbox" /> Depo adedi ve sayımı 0
-            olanları gizle</label
-          >
-        </div>
-        <div class="table-shell">
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <button class="sort-button" data-sort="stock">
-                    Stok no <span>↕</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="sort-button" data-sort="name">
-                    Malzeme <span>↕</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="sort-button" data-sort="warehouse">
-                    Depo adı <span>↕</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="sort-button" data-sort="address">
-                    Adres <span>↕</span>
-                  </button>
-                </th>
-                <th>Teknisyen<br />zimmet</th>
-                <th>
-                  <button class="sort-button" data-sort="stockCount">
-                    Depo<br />adedi <span>↕</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="sort-button" data-sort="count">
-                    Sayım <span>↕</span>
-                  </button>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-        </div>
-        <div class="table-footer">
-          <span id="rowSummary">0 kayıt</span
-          ><span>Seçmek için satıra tıklayın</span>
-        </div>
-      </section>
+        <header class="topbar">
+            <div class="brand">
+                <img src="icon.svg" alt="ARON" />
+                <div><strong>ARON</strong><span>ENVANTER SAYIM</span></div>
+            </div>
+            <div class="toolbar">
+                <span id="dataStatus">Veri bekleniyor</span><button id="refreshButton" class="button button-dark">
+                    Verileri yenile
+                </button>
+            </div>
+        </header>
+        <section class="quick-area">
+            <div class="entry-panel">
+                <label for="stockInput">Stok numarası</label>
+                <div class="input-row">
+                    <input id="stockInput" autocomplete="off" autofocus placeholder="Stok no okutun veya yazın" />
+                    <button id="clearButton" class="icon-button" title="Girişi temizle">
+                        ×
+                    </button>
+                </div>
+            </div>
+            <div id="selectedCard" class="selected-card empty">
+                <span class="eyebrow">SEÇİLİ ÜRÜN</span><strong id="selectedStock">Ürün seçilmedi</strong><span
+                    id="selectedName">Barkod okutarak başlayın</span>
+                <div class="selected-meta">
+                    <span id="selectedAddress">Adres -</span><span id="selectedWarehouse">Depo -</span>
+                </div>
+            </div>
+            <div id="counterPanel" class="counter-panel">
+                <div class="counter-value">
+                    <span class="counter-label">DEPO ADEDİ</span><output id="stockCountOutput">0</output>
+                </div>
+                <div class="counter-divider"></div>
+                <div class="counter-value">
+                    <span class="counter-label">SAYIM</span><output id="countOutput">0</output>
+                </div>
+                <div class="counter-actions">
+                    <button id="incrementButton" title="Sayımı artır">+</button>
+                    <button id="decrementButton" title="Sayımı azalt">−</button>
+                </div>
+            </div>
+        </section>
+        <nav class="tabs">
+            <button class="tab active" data-view="count">Sayım ekranı</button>
+            <button class="tab" data-view="table">Tablo</button>
+            <button class="tab" data-view="diff">Farklı Olanlar</button>
+        </nav>
+        <section id="countView" class="view count-view">
+            <div class="view-heading">
+                <div>
+                    <span class="eyebrow">CANLI GÖRÜNÜM</span>
+                    <h1>Sayım durumu</h1>
+                </div>
+                <span id="mainCountStock" class="summary-pill">Ürün seçilmedi</span>
+            </div>
+            <div id="mainCountPanel" class="main-count-panel equal">
+                <div class="main-count-value">
+                    <span>DEPO ADEDİ</span>
+                    <strong id="mainStockCount">0</strong>
+                </div>
+                <div class="main-count-divider"></div>
+                <div class="main-count-value">
+                    <span>SAYIM</span>
+                    <strong id="mainCount">0</strong>
+                </div>
+            </div>
+        </section>
+        <section id="tableView" class="view table-view hidden">
+            <div class="table-tools">
+                <div class="search-wrap">
+                    <span>⌕</span><input id="searchInput" placeholder="Stok no, malzeme adı veya adres ara" />
+                </div>
+                <select id="filterSelect">
+                    <option value="all">Tümü</option>
+                    <option value="over">Depo adedi sayımdan fazla</option>
+                    <option value="under">Depo adedi sayımdan az</option>
+                </select>
+                <label class="check-label"><input id="hideZero" type="checkbox" /> Depo adedi ve sayımı 0 olanları gizle
+                </label>
+            </div>
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>
+                                <button class="sort-button" data-sort="stock">
+                                    Stok no <span>↕</span>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="sort-button" data-sort="name">
+                                    Malzeme <span>↕</span>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="sort-button" data-sort="warehouse">
+                                    Depo adı <span>↕</span>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="sort-button" data-sort="address">
+                                    Adres <span>↕</span>
+                                </button>
+                            </th>
+                            <th>Teknisyen<br />zimmet</th>
+                            <th>
+                                <button class="sort-button" data-sort="stockCount">
+                                    Depo<br />adedi <span>↕</span>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="sort-button" data-sort="count">
+                                    Sayım <span>↕</span>
+                                </button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+            <div class="table-footer">
+                <span id="rowSummary">0 kayıt</span><span>Seçmek için satıra tıklayın</span>
+            </div>
+        </section>
+        <section id="diffView" class="view diff-view hidden">
+            <div class="view-heading">
+                <div>
+                    <span class="eyebrow">FARK ANALİZİ</span>
+                    <h1>Farklı olanlar</h1>
+                </div>
+                <span id="countSummary" class="summary-pill">0 ürün</span>
+            </div>
+            <div id="countGrid" class="count-grid"></div>
+        </section>
     </main>
     <div id="alertModal" class="modal hidden">
-      <div class="modal-card">
-        <div class="modal-icon">!</div>
-        <h2>Stok bulunamadı</h2>
-        <p id="alertMessage">Girdiğiniz stok numarası listede bulunmuyor.</p>
-        <button id="closeModal" class="button button-dark">Tamam</button>
-      </div>
+        <div class="modal-card">
+            <div class="modal-icon">!</div>
+            <h2>Stok bulunamadı</h2>
+            <p id="alertMessage">Girdiğiniz stok numarası listede bulunmuyor.</p>
+            <button id="closeModal" class="button button-dark">Tamam</button>
+        </div>
     </div>
     <script src="app.js"></script>
-  </body>
+</body>
+
 </html>
