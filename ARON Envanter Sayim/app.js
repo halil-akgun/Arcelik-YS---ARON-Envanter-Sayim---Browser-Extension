@@ -172,6 +172,29 @@ function changeCount(amount) {
   state.selected.difference = differenceFor(state.selected);
   updateSelected(state.selected);
 }
+function openManualCountModal() {
+  if (!state.selected) return;
+  const input = $("#manualCountInput");
+  input.value = state.selected.count;
+  $("#manualCountModal").classList.remove("hidden");
+  requestAnimationFrame(() => {
+    input.focus();
+    input.select();
+  });
+}
+function closeManualCountModal() {
+  $("#manualCountModal").classList.add("hidden");
+}
+function submitManualCount() {
+  if (!state.selected) return;
+  const value = Number($("#manualCountInput").value);
+  if (!Number.isInteger(value) || value < 0) return;
+
+  state.selected.count = value;
+  state.selected.difference = differenceFor(state.selected);
+  closeManualCountModal();
+  updateSelected(state.selected);
+}
 function showAlert(message) {
   $("#alertMessage").textContent = message;
   $("#alertModal").classList.remove("hidden");
@@ -274,11 +297,19 @@ function bindEvents() {
     $("#stockInput").focus();
   });
   $("#incrementButton").addEventListener("click", () => changeCount(1));
+  $("#editCountButton").addEventListener("click", openManualCountModal);
   $("#decrementButton").addEventListener("click", () => changeCount(-1));
   $("#refreshButton").addEventListener("click", () => loadData(true));
   $("#resetButton").addEventListener("click", resetCounts);
+  $("#manualCountForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    submitManualCount();
+  });
   $("#closeModal").addEventListener("click", () =>
     $("#alertModal").classList.add("hidden"),
+  );
+  $("#closeModal2").addEventListener("click", () =>
+    $("#manualCountModal").classList.add("hidden"),
   );
   ["searchInput", "filterSelect", "hideZero"].forEach((id) =>
     $("#" + id).addEventListener("input", renderTable),

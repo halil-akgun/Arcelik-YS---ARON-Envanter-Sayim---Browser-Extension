@@ -51,6 +51,8 @@
                 </div>
                 <div class="counter-actions">
                     <button id="incrementButton" title="Sayımı artır">+</button>
+                    <button id="editCountButton" title="Sayımı manuel düzenle"
+                        aria-label="Sayımı manuel düzenle">&#9998;</button>
                     <button id="decrementButton" title="Sayımı azalt">−</button>
                 </div>
             </div>
@@ -155,6 +157,19 @@
             <p id="alertMessage">Girdiğiniz stok numarası listede bulunmuyor.</p>
             <button id="closeModal" class="button button-dark">Tamam</button>
         </div>
+    </div>
+    <div id="manualCountModal" class="modal hidden">
+        <form id="manualCountForm" class="modal-card manual-count-card">
+            <h2>Sayımı düzenle</h2>
+
+            <label for="manualCountInput">Yeni sayım miktarı</label>
+
+            <input id="manualCountInput" type="number" min="0" step="1" required />
+
+            <button id="closeModal2" type="button" class="button button-dark">
+                İptal
+            </button>
+        </form>
     </div>
     <script src="app.js"></script>
 </body>

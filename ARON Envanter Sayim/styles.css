@@ -221,6 +221,9 @@ body {
 .counter-actions button:hover {
   background: var(--yellow);
 }
+.counter-actions button:nth-child(2) {
+  font-size: 20px;
+}
 .tabs {
   display: flex;
   border-bottom: 3px solid var(--ink);
@@ -514,6 +517,29 @@ tbody tr.over {
 .modal-card button {
   margin-top: 10px;
   width: 100%;
+}
+.manual-count-card {
+  width: min(300px, calc(100vw - 40px));
+  padding: 22px;
+  text-align: left;
+}
+.manual-count-card h2 {
+  margin-top: 0;
+}
+.manual-count-card label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.manual-count-card input {
+  width: 100%;
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  padding: 11px 12px;
+  outline: 0;
+  font: 700 20px Manrope;
 }
 @media (max-width: 800px) {
   .workspace {
