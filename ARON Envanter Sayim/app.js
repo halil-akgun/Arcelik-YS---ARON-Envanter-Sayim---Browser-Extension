@@ -17,42 +17,79 @@ const differenceFor = (item) =>
 async function loadData(force = false) {
   try {
     const stored = await chrome.storage.local.get(storageKey);
+
     if (
       !force &&
       Array.isArray(stored[storageKey]) &&
       stored[storageKey].length
     ) {
+      // Use cached data when a forced refresh is not requested.
       state.items = stored[storageKey];
       setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
+      syncSelected();
       render();
       return;
     }
+
     setStatus("Veriler alınıyor...");
+
     const response = await fetch(apiUrl);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
     const payload = await response.json();
+
+    // Match previously saved products by stock number.
+    const oldItems = Array.isArray(stored[storageKey])
+      ? stored[storageKey]
+      : [];
+
+    const oldItemsMap = new Map(
+      oldItems.map((item) => [normalize(item.stock), item])
+    );
+
     state.items = Array.isArray(payload)
-      ? payload.map((item) => ({
+      ? payload.map((item) => {
+        const stock = String(item.MALZEME_STOK_NO ?? "");
+        const oldItem = oldItemsMap.get(normalize(stock));
+
+        return {
           address: item.ADRES ?? "",
-          stock: String(item.MALZEME_STOK_NO ?? ""),
+          stock,
           name: item.MALZEME ?? "",
           stockCount: numberValue(item.TOPLAM_MEVCUT_ADET),
           technicianCount: numberValue(item.TEKNISYEN_ZIMMET_ADET),
           warehouse: item.DEPO_ADI ?? "",
-          count: 0,
+
+          // Preserve the count for existing products; start new products at zero.
+          count: oldItem ? numberValue(oldItem.count) : 0,
+
+          // Recalculate the difference against the latest stock quantity.
           difference: 0,
-        }))
+        };
+      })
       : [];
+
+    // Recalculate differences after loading the latest stock data.
+    state.items.forEach((item) => {
+      item.difference = differenceFor(item);
+    });
+
     await chrome.storage.local.set({ [storageKey]: state.items });
+
     setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
+    syncSelected();
     render();
   } catch (error) {
+    console.error(error);
+
     setStatus("Veri alınamadı");
+
     showAlert(
       "Sunucudan veriler alınamadı. Bağlantıyı ve API adresini kontrol edin.",
     );
   }
 }
+
 function setStatus(text) {
   $("#dataStatus").textContent = text;
 }
@@ -62,15 +99,24 @@ async function saveData() {
 function selectedCount() {
   return state.selected ? state.selected.count : 0;
 }
-function updateSelected(item, increase = false) {
-  state.selected = item;
-  if (increase) item.count += 1;
+function syncSelected() {
+  if (!state.selected) return;
+
+  // Refresh the selected object because a forced load replaces the item list.
+  const selectedStock = state.selected.stock;
+  state.selected = state.items.find(
+    (item) => normalize(item.stock) === normalize(selectedStock),
+  ) || null;
+
+  if (state.selected) renderSelected(state.selected);
+}
+function renderSelected(item) {
+  // Keep both counter panels consistent with the selected item.
   item.difference = differenceFor(item);
-  $("#stockInput").value = "";
   $("#selectedCard").classList.remove("empty");
   $("#selectedStock").textContent = item.stock;
   $("#selectedName").textContent = item.name;
-  $("#selectedAddress").textContent = `Adres ${item.address || "-"}`;
+  $("#selectedAddress").textContent = `Adres${"\u00A0".repeat(3)}${item.address || "-"}`;
   $("#selectedWarehouse").textContent = item.warehouse || "Depo -";
   $("#stockCountOutput").textContent = item.stockCount;
   $("#countOutput").value = item.count;
@@ -84,6 +130,12 @@ function updateSelected(item, increase = false) {
     item.difference < 0 ? "under" : item.difference > 0 ? "over" : "equal";
   $("#counterPanel").classList.add(statusClass);
   $("#mainCountPanel").classList.add(statusClass);
+}
+function updateSelected(item, increase = false) {
+  state.selected = item;
+  if (increase) item.count += 1;
+  renderSelected(item);
+  $("#stockInput").value = "";
   render();
   saveData();
   requestAnimationFrame(() => $("#stockInput").focus());
@@ -165,11 +217,11 @@ function renderCount() {
     `${changed.length.toLocaleString("tr-TR")} farklı ürün`;
   $("#countGrid").innerHTML = changed.length
     ? changed
-        .map(
-          (item) =>
-            `<article class="count-tile ${item.difference > 0 ? "over" : "under"}"><div><div class="tile-stock">${escapeHtml(item.stock)}</div><div class="tile-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div></div><div class="tile-numbers"><strong>${item.count}</strong><span>depo ${item.stockCount}</span></div></article>`,
-        )
-        .join("")
+      .map(
+        (item) =>
+          `<article class="count-tile ${item.difference > 0 ? "over" : "under"}"><div><div class="tile-stock">${escapeHtml(item.stock)}</div><div class="tile-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div></div><div class="tile-numbers"><strong>${item.count}</strong><span>depo ${item.stockCount}</span></div></article>`,
+      )
+      .join("")
     : `<div class="empty-state">Henüz fark bulunan ürün yok.</div>`;
 }
 function renderTable() {
@@ -193,7 +245,7 @@ function escapeHtml(value) {
     /[&<>'"]/g,
     (char) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[
-        char
+      char
       ],
   );
 }
@@ -248,4 +300,4 @@ function bindEvents() {
   });
 }
 bindEvents();
-loadData();
+loadData(true);

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ARON Envanter Sayim Studio",
-  "version": "1.0.0",
-  "description": "Arcelik servis envanter kontrol merkezi",
+  "name": "ARON Envanter Sayım",
+  "version": "1.0",
+  "description": "Arçelik yetkili servis envanter sayımı",
   "permissions": ["storage", "tabs"],
   "host_permissions": ["https://6538c6baa543859d1bb1e611.mockapi.io/*"],
   "background": { "service_worker": "background.js" },
@@ -13,7 +13,7 @@
     "128": "logo.png"
   },
   "action": {
-    "default_title": "ARON Envanter Sayim Studio",
+    "default_title": "ARON Envanter Sayım",
     "default_icon": "logo.png"
   }
 }
