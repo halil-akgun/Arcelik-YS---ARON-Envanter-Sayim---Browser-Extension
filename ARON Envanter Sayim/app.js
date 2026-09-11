@@ -96,6 +96,19 @@ function setStatus(text) {
 async function saveData() {
   await chrome.storage.local.set({ [storageKey]: state.items });
 }
+async function resetCounts() {
+  if (!state.items.length) return;
+  if (!window.confirm("Tüm ürünlerin sayımlarını sıfırlamak istediğinizden emin misiniz?")) return;
+
+  state.items.forEach((item) => {
+    item.count = 0;
+    item.difference = differenceFor(item);
+  });
+  await saveData();
+  setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
+  if (state.selected) renderSelected(state.selected);
+  render();
+}
 function selectedCount() {
   return state.selected ? state.selected.count : 0;
 }
@@ -263,6 +276,7 @@ function bindEvents() {
   $("#incrementButton").addEventListener("click", () => changeCount(1));
   $("#decrementButton").addEventListener("click", () => changeCount(-1));
   $("#refreshButton").addEventListener("click", () => loadData(true));
+  $("#resetButton").addEventListener("click", resetCounts);
   $("#closeModal").addEventListener("click", () =>
     $("#alertModal").classList.add("hidden"),
   );

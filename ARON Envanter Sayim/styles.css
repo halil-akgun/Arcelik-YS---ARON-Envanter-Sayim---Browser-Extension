@@ -88,6 +88,13 @@ body {
   background: var(--ink);
   color: white;
 }
+.button-danger {
+  background: var(--red);
+  color: white;
+}
+.button-danger:hover {
+  background: #b8000b;
+}
 .quick-area {
   display: grid;
   grid-template-columns:
