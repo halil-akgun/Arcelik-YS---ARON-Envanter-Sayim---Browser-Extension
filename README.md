@@ -33,7 +33,7 @@ The extension must be reloaded from the Extensions page after changing its sourc
 
 The current API endpoint is:
 
-`https://6538c6baa543859d1bb1e611.mockapi.io/todos`
+`https://oasis.arcelik.com/YsDepoYonetimiApi/api/DepoYonetimi/GetInventoryReportDetail/6058`
 
 The API response is expected to provide these fields:
 

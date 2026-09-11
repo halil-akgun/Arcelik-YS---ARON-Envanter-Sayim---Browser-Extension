@@ -1,4 +1,4 @@
-const apiUrl = "https://6538c6baa543859d1bb1e611.mockapi.io/todos";
+const apiUrl = "https://oasis.arcelik.com/YsDepoYonetimiApi/api/DepoYonetimi/GetInventoryReportDetail/6058";
 const storageKey = "inventoryItems";
 const state = {
   items: [],

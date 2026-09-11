@@ -16,7 +16,7 @@ Use `Refresh data` to fetch the latest product list. The same refresh is perform
 
 ## Data contract
 
-The extension fetches JSON from `https://6538c6baa543859d1bb1e611.mockapi.io/todos`. Each product is mapped from these fields:
+The extension fetches JSON from `https://oasis.arcelik.com/YsDepoYonetimiApi/api/DepoYonetimi/GetInventoryReportDetail/6058`. Each product is mapped from these fields:
 
 | Field | Description |
 | --- | --- |

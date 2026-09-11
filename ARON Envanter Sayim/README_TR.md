@@ -16,7 +16,7 @@ Güncel ürün listesini almak için `Verileri yenile` düğmesine basın. Aynı
 
 ## Veri sözleşmesi
 
-Eklenti JSON verisini `https://6538c6baa543859d1bb1e611.mockapi.io/todos` adresinden alır. Her ürün aşağıdaki alanlardan oluşturulur:
+Eklenti JSON verisini `https://oasis.arcelik.com/YsDepoYonetimiApi/api/DepoYonetimi/GetInventoryReportDetail/6058` adresinden alır. Her ürün aşağıdaki alanlardan oluşturulur:
 
 | Alan | Açıklama |
 | --- | --- |
