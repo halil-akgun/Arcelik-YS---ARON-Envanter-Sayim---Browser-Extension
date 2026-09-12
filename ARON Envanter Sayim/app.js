@@ -9,22 +9,32 @@ const state = {
   view: "count",
 };
 const itemByStock = new Map();
+const itemById = new Map();
 const searchTextByItem = new WeakMap();
 let saveTimer;
 let oasisToken;
 let tokenResolver;
+let lastScannedStock = null;
 const $ = (selector) => document.querySelector(selector);
 const normalize = (value) => String(value ?? "").toLocaleLowerCase("tr-TR");
 const numberValue = (value) =>
   Number.isFinite(Number(value)) ? Number(value) : 0;
 const differenceFor = (item) =>
   item.count > item.stockCount ? 1 : item.count < item.stockCount ? -1 : 0;
+const locationKey = (stock, warehouse, address) =>
+  normalize(`${stock}\u0000${warehouse}\u0000${address}`);
 
 function indexItems() {
   itemByStock.clear();
+  itemById.clear();
   state.items.forEach((item) => {
     const stockKey = normalize(item.stock);
-    itemByStock.set(stockKey, item);
+    item.id ||= encodeURIComponent(
+      `${item.stock}\u0000${item.warehouse}\u0000${item.address}`,
+    );
+    if (!itemByStock.has(stockKey)) itemByStock.set(stockKey, []);
+    itemByStock.get(stockKey).push(item);
+    itemById.set(item.id, item);
     searchTextByItem.set(
       item,
       normalize(`${item.stock} ${item.name} ${item.address}`),
@@ -93,13 +103,18 @@ async function loadData(force = false) {
       : [];
 
     const oldItemsMap = new Map(
-      oldItems.map((item) => [normalize(item.stock), item])
+      oldItems.map((item) => [
+        locationKey(item.stock, item.warehouse, item.address),
+        item,
+      ]),
     );
 
     state.items = Array.isArray(payload)
       ? payload.map((item) => {
         const stock = String(item.MALZEME_STOK_NO ?? "");
-        const oldItem = oldItemsMap.get(normalize(stock));
+        const oldItem = oldItemsMap.get(
+          locationKey(stock, item.DEPO_ADI ?? "", item.ADRES ?? ""),
+        );
 
         return {
           address: item.ADRES ?? "",
@@ -175,7 +190,10 @@ function syncSelected() {
 
   // Refresh the selected object because a forced load replaces the item list.
   const selectedStock = state.selected.stock;
-  state.selected = itemByStock.get(normalize(selectedStock)) || null;
+  const selectedItems = itemByStock.get(normalize(selectedStock)) || [];
+  state.selected = selectedItems.find(
+    (item) => item.id === state.selected.id,
+  ) || selectedItems[0] || null;
 
   if (state.selected) renderSelected(state.selected);
 }
@@ -185,8 +203,7 @@ function renderSelected(item) {
   $("#selectedCard").classList.remove("empty");
   $("#selectedStock").textContent = item.stock;
   $("#selectedName").textContent = item.name;
-  $("#selectedAddress").textContent = `Adres${"\u00A0".repeat(3)}${item.address || "-"}`;
-  $("#selectedWarehouse").textContent = item.warehouse || "Depo -";
+  renderLocationButtons(item);
   $("#stockCountOutput").textContent = item.stockCount;
   $("#countOutput").value = item.count;
   $("#countOutput").textContent = item.count;
@@ -200,9 +217,21 @@ function renderSelected(item) {
   $("#counterPanel").classList.add(statusClass);
   $("#mainCountPanel").classList.add(statusClass);
 }
+function renderLocationButtons(item) {
+  const locations = itemByStock.get(normalize(item.stock)) || [item];
+  $("#selectedLocations").innerHTML = locations
+    .map(
+      (location) =>
+        `<button type="button" class="location-button${location.id === item.id ? " active" : ""}" data-item-id="${escapeHtml(location.id)}">${escapeHtml(location.address || "Adres -")}${"\u00A0".repeat(4)}${escapeHtml(location.warehouse || "")}</button>`,
+    )
+    .join("");
+}
 function updateSelected(item, increase = false) {
   state.selected = item;
-  if (increase) item.count += 1;
+  if (increase) {
+    item.count += 1;
+    beep(760, 0.07);
+  }
   renderSelected(item);
   $("#stockInput").value = "";
   updateChangedItem(item);
@@ -212,18 +241,58 @@ function updateSelected(item, increase = false) {
 function scanStock(rawValue) {
   const value = rawValue.trim();
   if (!value) return;
-  const item = itemByStock.get(normalize(value));
-  if (!item) {
+  const stockKey = normalize(value);
+  const items = itemByStock.get(stockKey);
+  if (!items?.length) {
+    lastScannedStock = null;
     showAlert(`${value} stok numarası listede bulunamadı.`);
     $("#stockInput").select();
     return;
   }
-  updateSelected(item, true);
+  if (items.length > 1 && lastScannedStock === stockKey) {
+    const selectedItem = items.some((item) => item.id === state.selected?.id)
+      ? state.selected
+      : items[0];
+    updateSelected(selectedItem, true);
+    return;
+  }
+  if (items.length > 1) {
+    lastScannedStock = null;
+    openLocationPicker(items);
+  } else {
+    lastScannedStock = stockKey;
+    updateSelected(items[0], true);
+  }
+}
+function openLocationPicker(items) {
+  $("#locationOptions").innerHTML = items
+    .map(
+      (item, index) =>
+        `<button type="button" class="location-option" data-item-id="${escapeHtml(item.id)}"${index === 0 ? " autofocus" : ""}>
+      <div class="location-line">
+        <strong>${escapeHtml(item.address || "Adres -")}</strong>
+        <span class="meta">· ${escapeHtml(item.warehouse || "Depo -")}</span>
+      </div>
+      <span class="meta">Depo ${item.stockCount} · Sayım ${item.count}</span>
+      </button>`,
+    )
+    .join("");
+  $("#locationModal").classList.remove("hidden");
+  $("#locationOptions .location-option")?.focus();
+  beep(680, 0.1);
+}
+function closeLocationPicker() {
+  $("#locationModal").classList.add("hidden");
+}
+function selectLocation(item, increase = false) {
+  lastScannedStock = normalize(item.stock);
+  updateSelected(item, increase);
 }
 function changeCount(amount) {
   if (!state.selected) return;
   state.selected.count = Math.max(0, state.selected.count + amount);
   state.selected.difference = differenceFor(state.selected);
+  beep(amount > 0 ? 760 : 360, 0.07);
   updateSelected(state.selected);
 }
 function openManualCountModal() {
@@ -241,11 +310,14 @@ function closeManualCountModal() {
 }
 function submitManualCount() {
   if (!state.selected) return;
+  const previousCount = state.selected.count;
   const value = Number($("#manualCountInput").value);
   if (!Number.isInteger(value) || value < 0) return;
 
   state.selected.count = value;
   state.selected.difference = differenceFor(state.selected);
+  if (value > previousCount) beep(760, 0.07);
+  else if (value < previousCount) beep(360, 0.07);
   closeManualCountModal();
   updateSelected(state.selected);
 }
@@ -264,18 +336,18 @@ function showOasisRequired() {
   $("#alertModal").classList.remove("hidden");
   beep();
 }
-function beep() {
+function beep(frequency = 520, duration = 0.18) {
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) return;
   const context = new AudioContextClass();
   const oscillator = context.createOscillator();
   const gain = context.createGain();
-  oscillator.frequency.value = 520;
+  oscillator.frequency.value = frequency;
   gain.gain.value = 0.08;
   oscillator.connect(gain);
   gain.connect(context.destination);
   oscillator.start();
-  oscillator.stop(context.currentTime + 0.18);
+  oscillator.stop(context.currentTime + duration);
 }
 function visibleItems() {
   const query = normalize($("#searchInput").value);
@@ -329,7 +401,7 @@ function updateChangedItem(item) {
 }
 function updateTableRow(item) {
   const row = document.querySelector(
-    `#tableBody tr[data-stock="${CSS.escape(item.stock)}"]`,
+    `#tableBody tr[data-item-id="${CSS.escape(item.id)}"]`,
   );
   const visible = isVisibleInTable(item);
 
@@ -347,11 +419,11 @@ function updateTableRow(item) {
   if (row || visible) renderTable();
 }
 function differenceTileHtml(item) {
-  return `<article class="count-tile ${item.difference > 0 ? "over" : "under"}" data-stock="${escapeHtml(item.stock)}"><div><div class="tile-stock">${escapeHtml(item.stock)}</div><div class="tile-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div></div><div class="tile-numbers"><strong>${item.count}</strong><span>depo ${item.stockCount}</span></div></article>`;
+  return `<article class="count-tile ${item.difference > 0 ? "over" : "under"}" data-item-id="${escapeHtml(item.id)}"><div><div class="tile-stock">${escapeHtml(item.stock)}</div><div class="tile-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div></div><div class="tile-numbers"><strong>${item.count}</strong><span>depo ${item.stockCount}</span></div></article>`;
 }
 function updateDifferenceTile(item) {
   const tile = document.querySelector(
-    `#countGrid article[data-stock="${CSS.escape(item.stock)}"]`,
+    `#countGrid article[data-item-id="${CSS.escape(item.id)}"]`,
   );
   const changed = item.difference !== 0;
 
@@ -390,7 +462,7 @@ function renderTable() {
   $("#tableBody").innerHTML = items
     .map(
       (item) =>
-        `<tr class="${item.difference > 0 ? "over" : item.difference < 0 ? "under" : ""}" data-stock="${escapeHtml(item.stock)}"><td>${escapeHtml(item.stock)}</td><td title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</td><td>${escapeHtml(item.warehouse)}</td><td>${escapeHtml(item.address)}</td><td>${item.technicianCount}</td><td>${item.stockCount}</td><td><strong>${item.count}</strong></td></tr>`,
+        `<tr class="${item.difference > 0 ? "over" : item.difference < 0 ? "under" : ""}" data-item-id="${escapeHtml(item.id)}"><td>${escapeHtml(item.stock)}</td><td title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</td><td>${escapeHtml(item.warehouse)}</td><td>${escapeHtml(item.address)}</td><td>${item.technicianCount}</td><td>${item.stockCount}</td><td><strong>${item.count}</strong></td></tr>`,
     )
     .join("");
   document
@@ -435,6 +507,7 @@ function bindEvents() {
     chrome.tabs.create({ url: oasisUrl });
     $("#alertModal").classList.add("hidden");
   });
+  $("#closeLocationModal").addEventListener("click", closeLocationPicker);
   $("#closeModal2").addEventListener("click", () =>
     $("#manualCountModal").classList.add("hidden"),
   );
@@ -454,6 +527,21 @@ function bindEvents() {
     }),
   );
   document.addEventListener("click", (event) => {
+    const locationButton = event.target.closest(".location-button");
+    if (locationButton) {
+      const item = itemById.get(locationButton.dataset.itemId);
+      if (item) {
+        selectLocation(item);
+      }
+      return;
+    }
+    const locationOption = event.target.closest(".location-option");
+    if (locationOption) {
+      const item = itemById.get(locationOption.dataset.itemId);
+      closeLocationPicker();
+      if (item) selectLocation(item, true);
+      return;
+    }
     const sortButton = event.target.closest(".sort-button");
     if (sortButton) {
       if (state.sortKey === sortButton.dataset.sort) state.sortDirection *= -1;
@@ -465,8 +553,8 @@ function bindEvents() {
     }
     const row = event.target.closest("tbody tr");
     if (row) {
-      const item = itemByStock.get(normalize(row.dataset.stock));
-      if (item) updateSelected(item);
+      const item = itemById.get(row.dataset.itemId);
+      if (item) selectLocation(item);
     }
   });
 }

@@ -38,7 +38,9 @@
                 <span class="eyebrow">SEÇİLİ ÜRÜN</span><strong id="selectedStock">Ürün seçilmedi</strong><span
                     id="selectedName">Barkod okutarak başlayın</span>
                 <div class="selected-meta">
-                    <span id="selectedAddress">Adres -</span><span id="selectedWarehouse">Depo -</span>
+                    <div id="selectedLocations" class="location-list">
+                        <span>Adres -</span>
+                    </div>
                 </div>
             </div>
             <div id="counterPanel" class="counter-panel">
@@ -171,6 +173,15 @@
                 İptal
             </button>
         </form>
+    </div>
+    <div id="locationModal" class="modal hidden">
+        <div class="modal-card location-modal-card">
+            <div class="modal-icon">?</div>
+            <h2>Adres seçin</h2>
+            <p>Bu ürün birden fazla adreste bulunuyor. Sayım yapılacak adresi seçin.</p>
+            <div id="locationOptions" class="location-options"></div>
+            <button id="closeLocationModal" type="button" class="button button-dark">İptal</button>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>

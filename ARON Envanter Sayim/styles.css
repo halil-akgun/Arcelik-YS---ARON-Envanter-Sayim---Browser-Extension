@@ -165,12 +165,31 @@ body {
 }
 .selected-meta {
   display: flex;
-  gap: 18px;
+  gap: 8px;
   border-top: 1px solid var(--line);
   padding-top: 10px;
   margin-top: auto;
   color: var(--ink) !important;
   font-size: 12px;
+}
+.location-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.location-button {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+  padding: 6px 8px;
+  font: 700 11px Manrope;
+  cursor: pointer;
+}
+.location-button:hover,
+.location-button.active {
+  border-color: var(--ink);
+  background: var(--yellow);
 }
 .counter-panel {
   display: flex;
@@ -541,6 +560,42 @@ tbody tr.over {
   outline: 0;
   font: 700 20px Manrope;
 }
+.location-modal-card {
+  width: min(430px, calc(100vw - 40px));
+}
+.location-options {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 4px;
+}
+.location-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fff;
+  padding: 11px 12px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.location-option:hover {
+  border-color: var(--ink);
+  background: var(--yellow);
+}
+.location-option:focus,
+.location-option.active {
+  border-color: var(--ink);
+  background: var(--yellow);
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+.location-option span {
+  color: var(--muted);
+  font-size: 11px;
+}
 @media (max-width: 800px) {
   .workspace {
     padding: 16px;
@@ -584,4 +639,9 @@ tbody tr.over {
     height: 640px;
     overflow: visible;
   }
+}
+.location-line {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
 }
