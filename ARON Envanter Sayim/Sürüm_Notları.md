@@ -25,9 +25,12 @@ ARON Envanter Sayım eklentisinin ilk Manifest V3 sürümüdür.
 - Aynı stok numarası art arda okutulduğunda seçilen adresi yeniden kullanma.
 - Adres seçimi, sayım artırma ve azaltma için farklı sesli bildirimler.
 - Büyük envanterlerde sayım sırasında yalnızca değişen tablo satırını veya fark kartını güncelleme.
+- Tüm yerel eklenti verilerini JSON olarak dışa aktarma ve başka bilgisayarda geri yükleme seçenekleri.
+- Yedek dosyası kaydedilirken tarayıcının kayıt konumu seçme penceresini kullanma.
+- Geri yüklenen envanter verileriyle internetsiz sayım yapabilmek için yerel önbellekten açılış.
 
 ### Sınırlamalar
 
 - Sayım sonuçları yerel olarak saklanır; API'ye gönderilmez.
-- Güncel verilerin alınabilmesi için yapılandırılmış API adresine erişim gerekir.
+- Güncel verilerin alınabilmesi için yapılandırılmış API adresine erişim gerekir; daha önce kaydedilen envanter verileri çevrimdışı kullanılabilir.
 - Eklenti README'de belgelenen API alan adlarını bekler.

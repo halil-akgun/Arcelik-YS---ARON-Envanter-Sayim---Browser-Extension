@@ -22,6 +22,8 @@ Depoda yüklenebilir tek eklenti `ARON Envanter Sayim/` klasöründe bulunur.
 - Oasis sekmesi açık ve giriş yapılmış değilse uyarı gösterme ve Oasis'i yeni sekmede açma.
 - Adres seçimi, sayım artırma ve azaltma için farklı sesli bildirimler.
 - Büyük listelerde sayım sırasında yalnızca değişen tablo satırını veya fark kartını güncelleme.
+- Tarayıcıda kayıtlı tüm eklenti verilerini JSON olarak yedekleme ve başka bilgisayarda geri yükleme.
+- Geri yüklenen envanter verileriyle internet bağlantısı olmadan sayım yapabilme.
 - Eklenti ikonuna tekrar basıldığında açık olan sayım sekmesini öne getirme.
 
 ## Kurulum

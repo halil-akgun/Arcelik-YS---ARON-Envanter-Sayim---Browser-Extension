@@ -88,6 +88,10 @@ body {
   background: var(--ink);
   color: white;
 }
+.button-secondary {
+  background: #edf0ee;
+  color: var(--ink);
+}
 .button-danger {
   background: var(--red);
   color: white;
@@ -595,6 +599,15 @@ tbody tr.over {
 .location-option span {
   color: var(--muted);
   font-size: 11px;
+}
+.backup-card {
+  text-align: left;
+}
+.backup-card h2 {
+  margin-top: 0;
+}
+.backup-card p {
+  margin: 0 0 10px;
 }
 @media (max-width: 800px) {
   .workspace {

@@ -8,7 +8,9 @@ The repository contains one loadable extension under `ARON Envanter Sayim/`.
 
 - Load inventory data from the configured API.
 - Preserve counting progress in Chrome local storage by stock number.
-- Refresh data when the page opens, after an F5 reload, or when `Refresh data` is clicked.
+- Open saved data from local storage when the page opens or after an F5 reload; fetch fresh data when `Refresh data` is clicked.
+- Back up all browser-stored extension data to a JSON file and restore it on another computer.
+- Continue counting offline after restoring an inventory backup.
 - Scan or enter a stock number and increase its count.
 - Select an address when a stock number exists at multiple locations; repeated scans of the same stock number reuse the selected address until another stock number is entered.
 - Increase or decrease the selected product manually.
@@ -52,6 +54,8 @@ The API response is expected to provide these fields:
 | `TEKNISYEN_ZIMMET_ADET` | Technician-assigned quantity |
 
 Counting progress is stored locally in Chrome under the `inventoryItems` key. When refreshed, records matching the same stock number, warehouse, and address keep their existing count; newly returned records start at zero. No server-side count submission is implemented.
+
+The `Back up/restore data` toolbar action exports all keys from `chrome.storage.local` to a JSON file. The browser asks for the save location. A valid backup can be restored on another computer, allowing the cached inventory to be used without network access.
 
 The API request uses the Oasis bearer token from an open, authenticated `https://oasis.arcelik.com/` tab.
 

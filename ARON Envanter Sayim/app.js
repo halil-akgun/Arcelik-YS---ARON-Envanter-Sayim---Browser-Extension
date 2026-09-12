@@ -66,9 +66,6 @@ requestToken();
 
 async function loadData(force = false) {
   try {
-    if (!oasisToken) oasisToken = await requestToken();
-    if (!oasisToken) throw new Error("Oasis token bulunamadı");
-
     const stored = await chrome.storage.local.get(storageKey);
 
     if (
@@ -84,6 +81,9 @@ async function loadData(force = false) {
       renderActiveView();
       return;
     }
+
+    if (!oasisToken) oasisToken = await requestToken();
+    if (!oasisToken) throw new Error("Oasis token bulunamadı");
 
     setStatus("Veriler alınıyor...");
 
@@ -157,6 +157,67 @@ async function loadData(force = false) {
       );
     }
   }
+}
+
+async function exportBackup() {
+  const data = await chrome.storage.local.get(null);
+  const backup = {
+    format: "aron-inventory-backup",
+    version: 1,
+    createdAt: new Date().toISOString(),
+    data,
+  };
+  const blobUrl = URL.createObjectURL(
+    new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }),
+  );
+
+  try {
+    await chrome.downloads.download({
+      url: blobUrl,
+      filename: "aron-envanter-yedegi.json",
+      saveAs: true,
+      conflictAction: "uniquify",
+    });
+    setStatus("Yedek dosyası kaydedildi");
+    closeBackupModal();
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+}
+
+async function importBackup(file) {
+  try {
+    const backup = JSON.parse(await file.text());
+    if (
+      !backup ||
+      backup.format !== "aron-inventory-backup" ||
+      backup.version !== 1 ||
+      !backup.data ||
+      typeof backup.data !== "object" ||
+      !Array.isArray(backup.data[storageKey])
+    ) {
+      throw new Error("Geçersiz yedek dosyası");
+    }
+
+    await chrome.storage.local.clear();
+    await chrome.storage.local.set(backup.data);
+    state.items = backup.data[storageKey];
+    indexItems();
+    state.selected = null;
+    setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
+    renderActiveView();
+    closeBackupModal();
+    showAlert("Yedek başarıyla geri yüklendi.", "Yedek geri yüklendi");
+  } catch (error) {
+    console.error(error);
+    showAlert("Yedek dosyası okunamadı veya dosya bu eklentiye ait değil.");
+  }
+}
+function openBackupModal() {
+  $("#backupModal").classList.remove("hidden");
+}
+function closeBackupModal() {
+  $("#backupModal").classList.add("hidden");
 }
 
 function setStatus(text) {
@@ -321,8 +382,8 @@ function submitManualCount() {
   closeManualCountModal();
   updateSelected(state.selected);
 }
-function showAlert(message) {
-  $("#alertTitle").textContent = "Stok bulunamadı";
+function showAlert(message, title = "Stok bulunamadı") {
+  $("#alertTitle").textContent = title;
   $("#alertMessage").textContent = message;
   $("#openOasisButton").classList.add("hidden");
   $("#alertModal").classList.remove("hidden");
@@ -496,6 +557,15 @@ function bindEvents() {
   $("#decrementButton").addEventListener("click", () => changeCount(-1));
   $("#refreshButton").addEventListener("click", () => loadData(true));
   $("#resetButton").addEventListener("click", resetCounts);
+  $("#backupButton").addEventListener("click", openBackupModal);
+  $("#exportBackupButton").addEventListener("click", exportBackup);
+  $("#importBackupButton").addEventListener("click", () => $("#backupFileInput").click());
+  $("#backupFileInput").addEventListener("change", (event) => {
+    const [file] = event.target.files;
+    if (file) importBackup(file);
+    event.target.value = "";
+  });
+  $("#closeBackupModal").addEventListener("click", closeBackupModal);
   $("#manualCountForm").addEventListener("submit", (event) => {
     event.preventDefault();
     submitManualCount();

@@ -19,6 +19,9 @@
                 <span id="dataStatus">Veri bekleniyor</span><button id="refreshButton" class="button button-dark">
                     Verileri yenile
                 </button>
+                <button id="backupButton" class="button button-dark">
+                    Verileri yedekle/al
+                </button>
                 <button id="resetButton" class="button button-danger">
                     Sayımı sıfırla
                 </button>
@@ -181,6 +184,16 @@
             <p>Bu ürün birden fazla adreste bulunuyor. Sayım yapılacak adresi seçin.</p>
             <div id="locationOptions" class="location-options"></div>
             <button id="closeLocationModal" type="button" class="button button-dark">İptal</button>
+        </div>
+    </div>
+    <div id="backupModal" class="modal hidden">
+        <div class="modal-card backup-card">
+            <h2>Verileri yedekle/al</h2>
+            <p>Tarayıcıda kayıtlı tüm verileri bir dosyaya aktarabilir veya daha önce alınmış bir yedeği geri yükleyebilirsiniz.</p>
+            <button id="exportBackupButton" type="button" class="button button-dark">Yedekle</button>
+            <button id="importBackupButton" type="button" class="button button-dark">Yedekten al</button>
+            <input id="backupFileInput" type="file" accept=".json,application/json" class="hidden" />
+            <button id="closeBackupModal" type="button" class="button button-secondary">İptal</button>
         </div>
     </div>
     <script src="app.js"></script>

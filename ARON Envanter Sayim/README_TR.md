@@ -14,7 +14,9 @@ Arayüz üç görünümden oluşur:
 - **Tablo:** Arama, fark filtreleri, sıfır değerleri gizleme, satır seçme ve sıralanabilir sütunları içerir.
 - **Farklı olanlar:** Depo adedi ile sayım adedi eşleşmeyen ürünleri gösterir.
 
-Güncel ürün listesini almak için `Verileri yenile` düğmesine basın. Aynı yenileme sayfa ilk açıldığında ve F5 ile yenilendiğinde otomatik olarak yapılır. Yenileme sırasında mevcut sayımlar stok numarası, depo ve adres eşleşmesine göre korunur.
+Güncel ürün listesini almak için `Verileri yenile` düğmesine basın. Sayım verileri mevcutsa sayfa ilk açıldığında ve F5 ile yenilendiğinde önce tarayıcıdaki yerel kayıttan açılır; böylece yedekten alınmış veriler internet bağlantısı olmadan kullanılabilir. Yenileme sırasında mevcut sayımlar stok numarası, depo ve adres eşleşmesine göre korunur.
+
+Üst menüdeki `Verileri yedekle/al` düğmesiyle tarayıcıda kayıtlı tüm eklenti verilerini JSON dosyası olarak yedekleyebilir veya başka bir bilgisayarda `Yedekten al` seçeneğiyle geri yükleyebilirsiniz. Yedekleme sırasında kaydedilecek konum tarayıcı tarafından sorulur. Güncel ürün listesini internet olmadan kullanmak için önce Oasis bağlantısı varken verileri yenileyip ardından yedek almanız gerekir.
 
 Barkod okutma sırasında açık ve giriş yapılmış bir Oasis sekmesi gerekir. Birden fazla adreste bulunan ürünler ayrı ayrı sayılır; seçili ürün alanındaki adres butonuyla aktif adres değiştirilebilir. Tablo satırından seçim yapıldığında adres doğrudan seçilir ve adres penceresi açılmaz.
 

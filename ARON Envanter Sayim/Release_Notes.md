@@ -25,9 +25,12 @@ Initial Manifest V3 release of the ARON Inventory Counting extension.
 - Reuse the selected address for consecutive scans of the same stock number.
 - Distinct audio feedback for address selection, count increases, and count decreases.
 - Faster large-inventory updates by changing only the affected table row or difference tile during counting.
+- Backup and restore controls for exporting all local extension data to JSON and importing it on another computer.
+- Browser save-location prompt for backup files.
+- Local-cache startup so restored inventory data can be used for offline counting.
 
 ### Limitations
 
 - Count results are stored locally and are not submitted to the API.
-- Fresh data requires access to the configured API endpoint.
+- Fresh data requires access to the configured API endpoint; previously saved inventory data can be used offline.
 - The extension currently expects the API field names documented in the README.
