@@ -8,6 +8,9 @@ const state = {
   sortDirection: 1,
   view: "count",
 };
+const itemByStock = new Map();
+const searchTextByItem = new WeakMap();
+let saveTimer;
 let oasisToken;
 let tokenResolver;
 const $ = (selector) => document.querySelector(selector);
@@ -16,6 +19,18 @@ const numberValue = (value) =>
   Number.isFinite(Number(value)) ? Number(value) : 0;
 const differenceFor = (item) =>
   item.count > item.stockCount ? 1 : item.count < item.stockCount ? -1 : 0;
+
+function indexItems() {
+  itemByStock.clear();
+  state.items.forEach((item) => {
+    const stockKey = normalize(item.stock);
+    itemByStock.set(stockKey, item);
+    searchTextByItem.set(
+      item,
+      normalize(`${item.stock} ${item.name} ${item.address}`),
+    );
+  });
+}
 
 // Create a port for communication with the background script.
 const port = chrome.runtime.connect({ name: "oasis-get-token" });
@@ -53,9 +68,10 @@ async function loadData(force = false) {
     ) {
       // Use cached data when a forced refresh is not requested.
       state.items = stored[storageKey];
+      indexItems();
       setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
       syncSelected();
-      render();
+      renderActiveView();
       return;
     }
 
@@ -106,12 +122,13 @@ async function loadData(force = false) {
     state.items.forEach((item) => {
       item.difference = differenceFor(item);
     });
+    indexItems();
 
     await chrome.storage.local.set({ [storageKey]: state.items });
 
     setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
     syncSelected();
-    render();
+    renderActiveView();
   } catch (error) {
     console.error(error);
 
@@ -133,6 +150,10 @@ function setStatus(text) {
 async function saveData() {
   await chrome.storage.local.set({ [storageKey]: state.items });
 }
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveData(), 300);
+}
 async function resetCounts() {
   if (!state.items.length) return;
   if (!window.confirm("Tüm ürünlerin sayımlarını sıfırlamak istediğinizden emin misiniz?")) return;
@@ -144,7 +165,7 @@ async function resetCounts() {
   await saveData();
   setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
   if (state.selected) renderSelected(state.selected);
-  render();
+  renderActiveView();
 }
 function selectedCount() {
   return state.selected ? state.selected.count : 0;
@@ -154,9 +175,7 @@ function syncSelected() {
 
   // Refresh the selected object because a forced load replaces the item list.
   const selectedStock = state.selected.stock;
-  state.selected = state.items.find(
-    (item) => normalize(item.stock) === normalize(selectedStock),
-  ) || null;
+  state.selected = itemByStock.get(normalize(selectedStock)) || null;
 
   if (state.selected) renderSelected(state.selected);
 }
@@ -186,16 +205,14 @@ function updateSelected(item, increase = false) {
   if (increase) item.count += 1;
   renderSelected(item);
   $("#stockInput").value = "";
-  render();
-  saveData();
+  updateChangedItem(item);
+  scheduleSave();
   requestAnimationFrame(() => $("#stockInput").focus());
 }
 function scanStock(rawValue) {
   const value = rawValue.trim();
   if (!value) return;
-  const item = state.items.find(
-    (entry) => normalize(entry.stock) === normalize(value),
-  );
+  const item = itemByStock.get(normalize(value));
   if (!item) {
     showAlert(`${value} stok numarası listede bulunamadı.`);
     $("#stockInput").select();
@@ -268,9 +285,7 @@ function visibleItems() {
     .filter((item) => {
       const matchesText =
         !query ||
-        [item.stock, item.name, item.address].some((value) =>
-          normalize(value).includes(query),
-        );
+        searchTextByItem.get(item).includes(query);
       const matchesFilter =
         filter === "all" ||
         (filter === "over"
@@ -290,9 +305,73 @@ function visibleItems() {
       );
     });
 }
-function render() {
-  renderCount();
-  renderTable();
+function renderActiveView() {
+  if (state.view === "table") renderTable();
+  else if (state.view === "diff") renderCount();
+}
+function isVisibleInTable(item) {
+  const query = normalize($("#searchInput").value);
+  const filter = $("#filterSelect").value;
+  const hideZero = $("#hideZero").checked;
+  const matchesText =
+    !query || searchTextByItem.get(item).includes(query);
+  const matchesFilter =
+    filter === "all" ||
+    (filter === "over"
+      ? item.stockCount > item.count
+      : item.stockCount < item.count);
+  const notZero = !hideZero || item.stockCount !== 0 || item.count !== 0;
+  return matchesText && matchesFilter && notZero;
+}
+function updateChangedItem(item) {
+  if (state.view === "table") updateTableRow(item);
+  else if (state.view === "diff") updateDifferenceTile(item);
+}
+function updateTableRow(item) {
+  const row = document.querySelector(
+    `#tableBody tr[data-stock="${CSS.escape(item.stock)}"]`,
+  );
+  const visible = isVisibleInTable(item);
+
+  if (row && visible) {
+    row.className = item.difference > 0
+      ? "over"
+      : item.difference < 0
+        ? "under"
+        : "";
+    row.cells[6].innerHTML = `<strong>${item.count}</strong>`;
+    return;
+  }
+
+  // A count change can move an item into or out of the active filter.
+  if (row || visible) renderTable();
+}
+function differenceTileHtml(item) {
+  return `<article class="count-tile ${item.difference > 0 ? "over" : "under"}" data-stock="${escapeHtml(item.stock)}"><div><div class="tile-stock">${escapeHtml(item.stock)}</div><div class="tile-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div></div><div class="tile-numbers"><strong>${item.count}</strong><span>depo ${item.stockCount}</span></div></article>`;
+}
+function updateDifferenceTile(item) {
+  const tile = document.querySelector(
+    `#countGrid article[data-stock="${CSS.escape(item.stock)}"]`,
+  );
+  const changed = item.difference !== 0;
+
+  if (tile && changed) {
+    tile.outerHTML = differenceTileHtml(item);
+  } else if (tile && !changed) {
+    tile.remove();
+  } else if (!tile && changed) {
+    $("#countGrid").insertAdjacentHTML("beforeend", differenceTileHtml(item));
+  }
+  const changedCount = state.items.reduce(
+    (total, entry) => total + (entry.difference !== 0 ? 1 : 0),
+    0,
+  );
+  $("#countSummary").textContent =
+    `${changedCount.toLocaleString("tr-TR")} farklı ürün`;
+  if (!changedCount) {
+    $("#countGrid").innerHTML =
+      `<div class="empty-state">Henüz fark bulunan ürün yok.</div>`;
+  }
 }
 function renderCount() {
   const changed = state.items.filter((item) => item.difference !== 0);
@@ -300,10 +379,7 @@ function renderCount() {
     `${changed.length.toLocaleString("tr-TR")} farklı ürün`;
   $("#countGrid").innerHTML = changed.length
     ? changed
-      .map(
-        (item) =>
-          `<article class="count-tile ${item.difference > 0 ? "over" : "under"}"><div><div class="tile-stock">${escapeHtml(item.stock)}</div><div class="tile-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div></div><div class="tile-numbers"><strong>${item.count}</strong><span>depo ${item.stockCount}</span></div></article>`,
-      )
+      .map(differenceTileHtml)
       .join("")
     : `<div class="empty-state">Henüz fark bulunan ürün yok.</div>`;
 }
@@ -374,6 +450,7 @@ function bindEvents() {
       $("#countView").classList.toggle("hidden", state.view !== "count");
       $("#tableView").classList.toggle("hidden", state.view !== "table");
       $("#diffView").classList.toggle("hidden", state.view !== "diff");
+      renderActiveView();
     }),
   );
   document.addEventListener("click", (event) => {
@@ -388,9 +465,7 @@ function bindEvents() {
     }
     const row = event.target.closest("tbody tr");
     if (row) {
-      const item = state.items.find(
-        (entry) => entry.stock === row.dataset.stock,
-      );
+      const item = itemByStock.get(normalize(row.dataset.stock));
       if (item) updateSelected(item);
     }
   });
