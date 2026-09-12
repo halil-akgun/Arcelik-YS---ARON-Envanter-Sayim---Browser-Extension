@@ -1,4 +1,5 @@
 const apiUrl = "https://oasis.arcelik.com/YsDepoYonetimiApi/api/DepoYonetimi/GetInventoryReportDetail/6058";
+const oasisUrl = "https://oasis.arcelik.com/";
 const storageKey = "inventoryItems";
 const state = {
   items: [],
@@ -7,6 +8,8 @@ const state = {
   sortDirection: 1,
   view: "count",
 };
+let oasisToken;
+let tokenResolver;
 const $ = (selector) => document.querySelector(selector);
 const normalize = (value) => String(value ?? "").toLocaleLowerCase("tr-TR");
 const numberValue = (value) =>
@@ -14,8 +17,33 @@ const numberValue = (value) =>
 const differenceFor = (item) =>
   item.count > item.stockCount ? 1 : item.count < item.stockCount ? -1 : 0;
 
+// Create a port for communication with the background script.
+const port = chrome.runtime.connect({ name: "oasis-get-token" });
+
+function requestToken() {
+  return new Promise((resolve) => {
+    tokenResolver = resolve;
+    port.postMessage({ action: "getTokenFromOasis" });
+  });
+}
+
+// Listen for messages from the background script.
+port.onMessage.addListener((message) => {
+  oasisToken = message.token || null;
+  if (tokenResolver) {
+    tokenResolver(oasisToken);
+    tokenResolver = null;
+  }
+  if (!oasisToken) console.error("Oasis token bulunamadı.");
+});
+
+requestToken();
+
 async function loadData(force = false) {
   try {
+    if (!oasisToken) oasisToken = await requestToken();
+    if (!oasisToken) throw new Error("Oasis token bulunamadı");
+
     const stored = await chrome.storage.local.get(storageKey);
 
     if (
@@ -33,7 +61,12 @@ async function loadData(force = false) {
 
     setStatus("Veriler alınıyor...");
 
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${oasisToken}`,
+      },
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const payload = await response.json();
@@ -84,9 +117,13 @@ async function loadData(force = false) {
 
     setStatus("Veri alınamadı");
 
-    showAlert(
-      "Sunucudan veriler alınamadı. Bağlantıyı ve API adresini kontrol edin.",
-    );
+    if (error.message === "Oasis token bulunamadı") {
+      showOasisRequired();
+    } else {
+      showAlert(
+        "Sunucudan veriler alınamadı. Bağlantıyı ve API adresini kontrol edin.",
+      );
+    }
   }
 }
 
@@ -196,7 +233,17 @@ function submitManualCount() {
   updateSelected(state.selected);
 }
 function showAlert(message) {
+  $("#alertTitle").textContent = "Stok bulunamadı";
   $("#alertMessage").textContent = message;
+  $("#openOasisButton").classList.add("hidden");
+  $("#alertModal").classList.remove("hidden");
+  beep();
+}
+function showOasisRequired() {
+  $("#alertTitle").textContent = "Oasis bağlantısı gerekli";
+  $("#alertMessage").textContent =
+    "Verileri almak için Oasis sayfasını başka bir sekmede açın ve hesabınıza giriş yapın.";
+  $("#openOasisButton").classList.remove("hidden");
   $("#alertModal").classList.remove("hidden");
   beep();
 }
@@ -308,6 +355,10 @@ function bindEvents() {
   $("#closeModal").addEventListener("click", () =>
     $("#alertModal").classList.add("hidden"),
   );
+  $("#openOasisButton").addEventListener("click", () => {
+    chrome.tabs.create({ url: oasisUrl });
+    $("#alertModal").classList.add("hidden");
+  });
   $("#closeModal2").addEventListener("click", () =>
     $("#manualCountModal").classList.add("hidden"),
   );
