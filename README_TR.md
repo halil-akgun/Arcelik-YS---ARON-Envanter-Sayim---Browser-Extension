@@ -10,13 +10,18 @@ Depoda yüklenebilir tek eklenti `ARON Envanter Sayim/` klasöründe bulunur.
 - Sayım ilerlemesini stok numarasına göre Chrome yerel belleğinde koruma.
 - Sayfa açılışında, F5 yenilemesinde ve `Verileri yenile` düğmesine basıldığında güncel verileri alma.
 - Stok numarasını barkodla okutma veya elle girme ve sayımı artırma.
+- Bir stok numarası birden fazla adreste bulunuyorsa adres seçme; aynı stok numarası art arda okutulduğunda seçilen adresi kullanma.
 - Seçili ürünün sayımını manuel olarak artırma veya azaltma.
+- Birden fazla adreste bulunan ürünlerin adres bazlı sayımlarını ayrı tutma.
 - Stok numarası, malzeme adı veya adrese göre arama.
 - Tüm ürünler, sayımı fazla olanlar ve sayımı eksik olanlar için filtreleme.
 - Depo adedi ve sayımı sıfır olan ürünleri gizleme.
 - Stok numarası, malzeme, depo, adres, depo adedi veya sayım adedine göre sıralama.
 - Sayım ekranı, tam tablo ve farklı olan ürünler görünümleri.
 - Listede olmayan stok numarası için uyarı penceresi ve sesli bildirim.
+- Oasis sekmesi açık ve giriş yapılmış değilse uyarı gösterme ve Oasis'i yeni sekmede açma.
+- Adres seçimi, sayım artırma ve azaltma için farklı sesli bildirimler.
+- Büyük listelerde sayım sırasında yalnızca değişen tablo satırını veya fark kartını güncelleme.
 - Eklenti ikonuna tekrar basıldığında açık olan sayım sekmesini öne getirme.
 
 ## Kurulum
@@ -46,7 +51,9 @@ API yanıtında aşağıdaki alanların bulunması beklenir:
 | `TOPLAM_MEVCUT_ADET` | Depodaki mevcut adet |
 | `TEKNISYEN_ZIMMET_ADET` | Teknisyene zimmetli adet |
 
-Sayım ilerlemesi Chrome içinde `inventoryItems` anahtarıyla yerel olarak saklanır. Yenileme sırasında aynı stok numarasına sahip ürünlerin mevcut sayımı korunur; yeni gelen ürünler sıfır sayımla başlar. Sunucuya sayım sonucu gönderme özelliği henüz bulunmamaktadır.
+Sayım ilerlemesi Chrome içinde `inventoryItems` anahtarıyla yerel olarak saklanır. Yenileme sırasında stok numarası, depo ve adresi aynı olan kayıtların mevcut sayımı korunur; yeni gelen kayıtlar sıfır sayımla başlar. Sunucuya sayım sonucu gönderme özelliği henüz bulunmamaktadır.
+
+API isteği, açık ve giriş yapılmış `https://oasis.arcelik.com/` sekmesinden alınan Oasis bearer token ile gönderilir.
 
 ## Ekran görüntüleri
 

@@ -10,13 +10,18 @@ The repository contains one loadable extension under `ARON Envanter Sayim/`.
 - Preserve counting progress in Chrome local storage by stock number.
 - Refresh data when the page opens, after an F5 reload, or when `Refresh data` is clicked.
 - Scan or enter a stock number and increase its count.
+- Select an address when a stock number exists at multiple locations; repeated scans of the same stock number reuse the selected address until another stock number is entered.
 - Increase or decrease the selected product manually.
+- Keep address-specific counts for products stored at multiple locations.
 - Search by stock number, product name, or address.
 - Filter products by all, over-counted, or under-counted status.
 - Hide products whose warehouse and count quantities are both zero.
 - Sort the table by stock number, product, warehouse, address, warehouse quantity, or count.
 - View the count screen, the complete table, and products with differences.
 - Show a warning and audible alert when an unknown stock number is entered.
+- Require an open, authenticated Oasis tab and provide a button to open it when unavailable.
+- Provide distinct audio feedback for address selection, count increases, and count decreases.
+- Update only the affected table row or difference tile during counting for faster operation with large inventories.
 - Reuse an already-open counting tab when the extension icon is clicked.
 
 ## Installation
@@ -46,7 +51,9 @@ The API response is expected to provide these fields:
 | `TOPLAM_MEVCUT_ADET` | Warehouse quantity |
 | `TEKNISYEN_ZIMMET_ADET` | Technician-assigned quantity |
 
-Counting progress is stored locally in Chrome under the `inventoryItems` key. When refreshed, products with the same stock number keep their existing count; newly returned products start at zero. No server-side count submission is implemented.
+Counting progress is stored locally in Chrome under the `inventoryItems` key. When refreshed, records matching the same stock number, warehouse, and address keep their existing count; newly returned records start at zero. No server-side count submission is implemented.
+
+The API request uses the Oasis bearer token from an open, authenticated `https://oasis.arcelik.com/` tab.
 
 ## Screenshots
 

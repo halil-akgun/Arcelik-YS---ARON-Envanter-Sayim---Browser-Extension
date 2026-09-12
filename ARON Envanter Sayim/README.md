@@ -4,7 +4,7 @@ This folder contains the loadable Chrome extension for ARON service inventory co
 
 ## Usage
 
-After installation, the extension opens on the count view. Enter or scan a stock number and press Enter. A valid item becomes selected and its count increases by one. The `+` and `-` controls change the selected count manually; the count cannot go below zero.
+After installation, the extension opens on the count view. Enter or scan a stock number and press Enter. A valid item becomes selected and its count increases by one. If the stock number exists at multiple addresses, choose an address first; repeated scans of the same stock number reuse that address until another stock number is entered. The `+` and `-` controls change the selected count manually; the count cannot go below zero.
 
 The interface has three views:
 
@@ -12,7 +12,9 @@ The interface has three views:
 - **Table:** Lists all products with search, status filters, zero-value hiding, row selection, and sortable columns.
 - **Differences:** Shows only products whose count differs from the warehouse quantity.
 
-Use `Refresh data` to fetch the latest product list. The same refresh is performed automatically when the page opens, including after an F5 reload. Existing counts are matched by stock number and retained across a refresh.
+Use `Refresh data` to fetch the latest product list. The same refresh is performed automatically when the page opens, including after an F5 reload. Existing counts are matched by stock number, warehouse, and address and retained across a refresh.
+
+Scanning requires an open and authenticated Oasis tab. Products stored at multiple addresses are counted separately, and the selected address is shown as a button in the selected-product panel. Table-row selection chooses the address directly without opening the address picker.
 
 ## Data contract
 
@@ -31,9 +33,9 @@ Values that are missing or not numeric are treated as empty text or zero where a
 
 ## Persistence and refresh behavior
 
-Counting data is stored in `chrome.storage.local` under the `inventoryItems` key. A refresh replaces the inventory metadata with the latest API response while preserving the local count for matching stock numbers. New products start with a count of zero. The extension does not write count results back to the API.
+Counting data is stored in `chrome.storage.local` under the `inventoryItems` key. A refresh replaces the inventory metadata with the latest API response while preserving the local count for matching stock number, warehouse, and address records. New products start with a count of zero. The extension does not write count results back to the API.
 
-If the API request fails, the current page shows an error status and an alert. The extension requires network access to load fresh data.
+If the API request fails, the current page shows an error status and an alert. The extension requires an authenticated Oasis tab and network access to load fresh data. Count changes update only the affected table row or difference tile when those views are active.
 
 ## Development
 

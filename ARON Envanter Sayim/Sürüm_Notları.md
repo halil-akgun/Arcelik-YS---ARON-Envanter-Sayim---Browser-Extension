@@ -7,10 +7,10 @@ ARON Envanter Sayım eklentisinin ilk Manifest V3 sürümüdür.
 ### İçerikler
 
 - Sayım sayfasını açan veya açık sayımı öne getiren arka plan service worker'ı.
-- Yapılandırılmış MockAPI adresinden ürün listesi alma.
+- Yapılandırılmış Oasis API adresinden ürün listesi alma.
 - Sayfa açılışında otomatik veri alma ve üst araç çubuğundan manuel yenileme.
 - Sayımların `inventoryItems` anahtarıyla `chrome.storage.local` içinde saklanması.
-- Veri yenilendiğinde mevcut sayımların stok numarasına göre korunması.
+- Veri yenilendiğinde mevcut sayımların stok numarası, depo ve adrese göre korunması.
 - Barkod veya klavye ile stok numarası girme ve sayımı otomatik artırma.
 - Sayımı sıfırın altına indirmeyen manuel artırma ve azaltma düğmeleri.
 - Seçili ürün için fazla, eksik ve eşit durumlarını gösteren sayaç panelleri.
@@ -20,6 +20,11 @@ ARON Envanter Sayım eklentisinin ilk Manifest V3 sürümüdür.
 - Sıralanabilir envanter tablosu ve satır seçimi.
 - Sayım ekranı, tablo ve farklı olanlar görünümleri.
 - Listede olmayan stok numaraları için sesli uyarı ve modal bildirim.
+- Oasis bearer token doğrulaması; açık ve giriş yapılmış sekme yoksa Oasis'i açma yönlendirmesi.
+- Birden fazla adreste bulunan ürünleri adres bazında ayrı sayma ve barkod okutma sırasında adres seçme.
+- Aynı stok numarası art arda okutulduğunda seçilen adresi yeniden kullanma.
+- Adres seçimi, sayım artırma ve azaltma için farklı sesli bildirimler.
+- Büyük envanterlerde sayım sırasında yalnızca değişen tablo satırını veya fark kartını güncelleme.
 
 ### Sınırlamalar
 

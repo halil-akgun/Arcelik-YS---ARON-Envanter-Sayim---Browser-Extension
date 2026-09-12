@@ -6,13 +6,17 @@ Bu klasör, ARON servis envanter sayımı için yüklenebilir Chrome eklentisini
 
 Kurulumdan sonra eklenti sayım ekranıyla açılır. Bir stok numarası girin veya barkod okutun ve Enter'a basın. Ürün bulunursa seçilir ve sayımı bir artar. Seçili ürünün sayımını manuel değiştirmek için `+` ve `-` düğmelerini kullanabilirsiniz; sayım sıfırın altına inmez.
 
+Stok numarası birden fazla adreste bulunuyorsa önce adres seçin; aynı stok numarası art arda okutulduğunda seçilen adres kullanılır, araya başka stok numarası girildiğinde adres seçimi yeniden istenir.
+
 Arayüz üç görünümden oluşur:
 
 - **Sayım ekranı:** Seçili ürün, depo adedi, mevcut sayım ve fark durumunu gösterir.
 - **Tablo:** Arama, fark filtreleri, sıfır değerleri gizleme, satır seçme ve sıralanabilir sütunları içerir.
 - **Farklı olanlar:** Depo adedi ile sayım adedi eşleşmeyen ürünleri gösterir.
 
-Güncel ürün listesini almak için `Verileri yenile` düğmesine basın. Aynı yenileme sayfa ilk açıldığında ve F5 ile yenilendiğinde otomatik olarak yapılır. Yenileme sırasında mevcut sayımlar stok numarasına göre korunur.
+Güncel ürün listesini almak için `Verileri yenile` düğmesine basın. Aynı yenileme sayfa ilk açıldığında ve F5 ile yenilendiğinde otomatik olarak yapılır. Yenileme sırasında mevcut sayımlar stok numarası, depo ve adres eşleşmesine göre korunur.
+
+Barkod okutma sırasında açık ve giriş yapılmış bir Oasis sekmesi gerekir. Birden fazla adreste bulunan ürünler ayrı ayrı sayılır; seçili ürün alanındaki adres butonuyla aktif adres değiştirilebilir. Tablo satırından seçim yapıldığında adres doğrudan seçilir ve adres penceresi açılmaz.
 
 ## Veri sözleşmesi
 
@@ -31,9 +35,9 @@ Eksik veya sayısal olmayan değerler uygun yerlerde boş metin ya da sıfır ol
 
 ## Yerel kayıt ve yenileme davranışı
 
-Sayım verileri `inventoryItems` anahtarıyla `chrome.storage.local` içinde saklanır. Yenileme sırasında ürün bilgileri API'nin güncel yanıtıyla değiştirilir; aynı stok numarasına sahip ürünün yerel sayımı korunur. Yeni ürünler sıfır sayımla başlar. Sayım sonuçları API'ye geri gönderilmez.
+Sayım verileri `inventoryItems` anahtarıyla `chrome.storage.local` içinde saklanır. Yenileme sırasında ürün bilgileri API'nin güncel yanıtıyla değiştirilir; stok numarası, depo ve adresi aynı olan kaydın yerel sayımı korunur. Yeni kayıtlar sıfır sayımla başlar. Sayım sonuçları API'ye geri gönderilmez.
 
-API isteği başarısız olursa sayfa hata durumunu ve uyarı penceresini gösterir. Güncel verileri almak için ağ bağlantısı gerekir.
+API isteği başarısız olursa sayfa hata durumunu ve uyarı penceresini gösterir. Güncel verileri almak için giriş yapılmış Oasis sekmesi ve ağ bağlantısı gerekir. Tablo veya farklı olanlar görünümünde sayım değiştiğinde yalnızca ilgili satır ya da kart güncellenir.
 
 ## Geliştirme
 
