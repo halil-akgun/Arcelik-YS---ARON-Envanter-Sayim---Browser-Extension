@@ -15,6 +15,8 @@ let saveTimer;
 let oasisToken;
 let tokenResolver;
 let lastScannedStock = null;
+let retryLoadAfterAlert = false;
+let audioContext;
 const $ = (selector) => document.querySelector(selector);
 const normalize = (value) => String(value ?? "").toLocaleLowerCase("tr-TR");
 const numberValue = (value) =>
@@ -64,21 +66,31 @@ port.onMessage.addListener((message) => {
 
 requestToken();
 
-async function loadData(force = false) {
+function hasCachedItems(stored) {
+  return Array.isArray(stored[storageKey]) && stored[storageKey].length > 0;
+}
+
+function useCachedData(items) {
+  state.items = items;
+  indexItems();
+  setStatus(
+    `${state.items.length.toLocaleString("tr-TR")} ürün (veriler güncel olmayabilir)`,
+    "warning",
+  );
+  syncSelected();
+  renderActiveView();
+}
+
+async function loadData(force = false, retryAttempt = false) {
   try {
     const stored = await chrome.storage.local.get(storageKey);
 
     if (
       !force &&
-      Array.isArray(stored[storageKey]) &&
-      stored[storageKey].length
+      hasCachedItems(stored)
     ) {
       // Use cached data when a forced refresh is not requested.
-      state.items = stored[storageKey];
-      indexItems();
-      setStatus(`${state.items.length.toLocaleString("tr-TR")} ürün yüklendi`);
-      syncSelected();
-      renderActiveView();
+      useCachedData(stored[storageKey]);
       return;
     }
 
@@ -93,7 +105,10 @@ async function loadData(force = false) {
         Authorization: `Bearer ${oasisToken}`,
       },
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 401) throw new Error("Oasis oturumu geçersiz");
+      throw new Error(`HTTP ${response.status}`);
+    }
 
     const payload = await response.json();
 
@@ -147,14 +162,28 @@ async function loadData(force = false) {
   } catch (error) {
     console.error(error);
 
-    setStatus("Veri alınamadı");
+    const stored = await chrome.storage.local.get(storageKey);
+    if (retryAttempt && hasCachedItems(stored)) {
+      useCachedData(stored[storageKey]);
+      showAlert(
+        "Sunucuya bağlanılamadığı için önceden kayıtlı veriler kullanılıyor. Bu veriler güncel olmayabilir.",
+        "Kayıtlı veriler kullanılıyor",
+      );
+      return;
+    }
 
-    if (error.message === "Oasis token bulunamadı") {
-      showOasisRequired();
+    setStatus("Veri alınamadı", "warning");
+
+    if (
+      error.message === "Oasis token bulunamadı" ||
+      error.message === "Oasis oturumu geçersiz"
+    ) {
+      showOasisRequired(hasCachedItems(stored));
     } else {
       showAlert(
         "Sunucudan veriler alınamadı. Bağlantıyı ve API adresini kontrol edin.",
       );
+      retryLoadAfterAlert = hasCachedItems(stored);
     }
   }
 }
@@ -220,8 +249,10 @@ function closeBackupModal() {
   $("#backupModal").classList.add("hidden");
 }
 
-function setStatus(text) {
-  $("#dataStatus").textContent = text;
+function setStatus(text, tone = "") {
+  const status = $("#dataStatus");
+  status.textContent = text;
+  status.classList.toggle("warning", tone === "warning");
 }
 async function saveData() {
   await chrome.storage.local.set({ [storageKey]: state.items });
@@ -268,7 +299,9 @@ function renderSelected(item) {
   $("#stockCountOutput").textContent = item.stockCount;
   $("#countOutput").value = item.count;
   $("#countOutput").textContent = item.count;
-  $("#mainCountStock").textContent = item.stock;
+  const difference = item.count - item.stockCount;
+  $("#mainDifferenceValue").textContent =
+    `${difference > 0 ? "+" : ""}${difference}`;
   $("#mainStockCount").textContent = item.stockCount;
   $("#mainCount").textContent = item.count;
   $("#counterPanel").classList.remove("under", "over", "equal");
@@ -389,26 +422,33 @@ function showAlert(message, title = "Stok bulunamadı") {
   $("#alertModal").classList.remove("hidden");
   beep();
 }
-function showOasisRequired() {
+function showOasisRequired(shouldRetry = false) {
   $("#alertTitle").textContent = "Oasis bağlantısı gerekli";
   $("#alertMessage").textContent =
     "Verileri almak için Oasis sayfasını başka bir sekmede açın ve hesabınıza giriş yapın.";
   $("#openOasisButton").classList.remove("hidden");
   $("#alertModal").classList.remove("hidden");
+  retryLoadAfterAlert = shouldRetry;
   beep();
 }
 function beep(frequency = 520, duration = 0.18) {
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) return;
-  const context = new AudioContextClass();
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
+  audioContext ||= new AudioContextClass();
+  if (audioContext.state === "suspended") audioContext.resume();
+
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
   oscillator.frequency.value = frequency;
   gain.gain.value = 0.08;
   oscillator.connect(gain);
-  gain.connect(context.destination);
+  gain.connect(audioContext.destination);
   oscillator.start();
-  oscillator.stop(context.currentTime + duration);
+  oscillator.stop(audioContext.currentTime + duration);
+  oscillator.addEventListener("ended", () => {
+    oscillator.disconnect();
+    gain.disconnect();
+  }, { once: true });
 }
 function visibleItems() {
   const query = normalize($("#searchInput").value);
@@ -570,10 +610,14 @@ function bindEvents() {
     event.preventDefault();
     submitManualCount();
   });
-  $("#closeModal").addEventListener("click", () =>
-    $("#alertModal").classList.add("hidden"),
-  );
+  $("#closeModal").addEventListener("click", () => {
+    const shouldRetry = retryLoadAfterAlert;
+    retryLoadAfterAlert = false;
+    $("#alertModal").classList.add("hidden");
+    if (shouldRetry) loadData(true, true);
+  });
   $("#openOasisButton").addEventListener("click", () => {
+    retryLoadAfterAlert = false;
     chrome.tabs.create({ url: oasisUrl });
     $("#alertModal").classList.add("hidden");
   });

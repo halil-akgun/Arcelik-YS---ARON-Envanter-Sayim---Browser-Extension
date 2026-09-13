@@ -77,6 +77,10 @@ body {
   color: var(--muted);
   font-size: 12px;
 }
+.toolbar .warning {
+  color: #8b1e1e;
+  font-weight: 700;
+}
 .button {
   border: 0;
   border-radius: 5px;
@@ -284,6 +288,13 @@ body {
   padding: 7px 12px;
   border-radius: 100px;
   font-size: 12px;
+  font-weight: 800;
+}
+.main-difference-pill {
+  font-size: 15px;
+  font-weight: 400;
+}
+.main-difference-pill strong {
   font-weight: 800;
 }
 .count-grid {
