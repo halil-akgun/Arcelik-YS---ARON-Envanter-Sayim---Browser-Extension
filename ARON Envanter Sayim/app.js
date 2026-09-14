@@ -617,9 +617,7 @@ function bindEvents() {
     if (shouldRetry) loadData(true, true);
   });
   $("#openOasisButton").addEventListener("click", () => {
-    retryLoadAfterAlert = false;
     chrome.tabs.create({ url: oasisUrl });
-    $("#alertModal").classList.add("hidden");
   });
   $("#closeLocationModal").addEventListener("click", closeLocationPicker);
   $("#closeModal2").addEventListener("click", () =>
